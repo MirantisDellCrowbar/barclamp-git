@@ -41,10 +41,19 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
     git_url = cnode[cbook][:gitrepo]
   end
 
+  # fix host key checking
+  cookbook_file "/root/.ssh/wrap-ssh4git.sh" do
+    cookbook "git"
+    source "wrap-ssh4git.sh"
+    owner "root"
+    mode 00700
+  end
+
   git install_path do
     repository git_url
     reference ref
     action :sync
+    ssh_wrapper "/root/.ssh/wrap-ssh4git.sh"
   end
 
   # prepare prefix to commands in using virtualenv
