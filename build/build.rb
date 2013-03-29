@@ -89,6 +89,8 @@ repo_data.each do |bc_name, repos|
           #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
           #horizon seems broken with django 1.5, so lets try to freeze 1.4.5
           system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' tmp/tools/pip-requires"
+          #this oslo-config workaround will be useless after grizzly finaly released
+          system "sed -i 's|http://tarballs.openstack.org/oslo-config/oslo-config-2013*.*|oslo.config=>1.1.0|g' tmp/tools/pip-requires"
           repeat_unless 10, "failed download pips for #{base_name}" do
             puts "export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
             system("export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires")
@@ -101,8 +103,6 @@ repo_data.each do |bc_name, repos|
       repeat_unless 10, "failed to package pip reqs" do
         system("dir2pi #{pip_cache_path}")
       end
-      #we should wrap only relative path for pips in repo
-      system "sed -i 's|http://tarballs.openstack.org/oslo-config/oslo-config-2013.1b3.tar.gz#egg=oslo-config|oslo-config|g' tmp/tools/pip-requires"
       puts "packing #{repo_name}.git to #{repo_name}.tar.bz2" if debug
       system "cd #{repos_path} && tar cjf #{repo_name}.tar.bz2 #{repo_name}.git/"
       puts "cleaning #{repo_name}.git" if debug

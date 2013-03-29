@@ -120,6 +120,15 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       command "sed -i '/github/d' tools/pip-requires"
       only_if { comp_name == "swift" }
     end
+
+    # workaround for oslo-config in pip-requires
+    #    this will be useless after grizzly final release
+
+    execute "fix_oslo_config_quirks#{comp_name}" do
+      cwd install_path
+      command "sed -i 's|http://tarballs.openstack.org/oslo-config/oslo-config-2013*.*|oslo.config=>1.1.0|g' tools/pip-requires"
+    end
+
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
       command "#{pip_cmd} -r tools/pip-requires"
