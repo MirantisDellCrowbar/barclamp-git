@@ -70,7 +70,7 @@ repo_data.each do |bc_name, repos|
       end
       puts "caching pip requires packages from branches #{branches.join(' ')}" if debug
       repeat_unless 10, "failed to create working tree of #{base_name}" do
-        system "git clone #{repos_path}/#{repo_name}.git tmp"
+        system "rm -rf tmp && git clone #{repos_path}/#{repo_name}.git tmp"
       end
       if File.exists? "tmp/tools/pip-requires"
         branches.each do |branch|
