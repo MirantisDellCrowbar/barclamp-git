@@ -107,7 +107,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       end
       execute "pip_install_requirements_#{comp_name}" do
         cwd install_path
-        command "#{pip_cmd} -r requirement_file"
+        command "#{pip_cmd} -r #{requirement_file}"
       end
     else
       puts "WARNING: Python requirement file not found!"
