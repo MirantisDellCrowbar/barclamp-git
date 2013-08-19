@@ -32,6 +32,8 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   package("git")
   package("python-setuptools")
   package("python-pip")
+  package("python-dev")
+  package("libxslt1-dev")
 
   if cnode[cbook][:use_gitbarclamp]
     env_filter = " AND git_config_environment:git-config-#{cnode[cbook][:git_instance]}"
@@ -44,8 +46,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   git install_path do
     repository git_url
     reference ref
-    action :sync
-  end
+  end.run_action :sync
 
   # prepare prefix to commands in using virtualenv
   prefix = params[:virtualenv] ? ". #{params[:virtualenv]}/bin/activate && " : nil
@@ -53,7 +54,6 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   if params[:virtualenv] and not File.exist?(params[:virtualenv])
     # prefix not nil and .venv not exist try create virtualenv
     package("python-virtualenv")
-    package("python-dev")
     directory params[:virtualenv] do
       recursive true
       owner "root"
@@ -61,10 +61,9 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       mode  0775
       action :create
     end
-    execute "virtualenv #{params[:virtualenv]} --system-site-packages"
+    execute "virtualenv #{params[:virtualenv]} --no-site-packages"
   end
 
-  pip_cmd = "#{prefix}pip install"
   if cnode[cbook][:use_pip_cache]
     provisioner = search(:node, "roles:provisioner-server").first
     proxy_addr = provisioner[:fqdn]
@@ -72,20 +71,6 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
     pip_cmd = "#{prefix}pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
   else
     pip_cmd = "pip install"
-  end
-  # fix host key checking
-  cookbook_file "/root/.ssh/wrap-ssh4git.sh" do
-    cookbook "git"
-    source "wrap-ssh4git.sh"
-    owner "root"
-    mode 00700
-  end
-
-  git install_path do
-    repository git_url 
-    reference ref
-    action :sync
-    ssh_wrapper "/root/.ssh/wrap-ssh4git.sh"
   end
 
   if cnode[comp_name]
@@ -114,16 +99,22 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   end
 
   unless params[:without_setup]
-    # workaround for swift
-    execute "remove_https_from_pip_requires_for_#{comp_name}" do
-      cwd install_path
-      command "sed -i '/github/d' tools/pip-requires"
-      only_if { comp_name == "swift" }
+    requirement_file = ["requirements.txt","tools/pip-requires"].select{ |file| File.exists?("/opt/quantum/#{file}") }.first
+    if requirement_file
+      # workaround for swift
+      execute "remove_https_from_pip_requires_for_#{comp_name}" do
+        cwd install_path
+        command "sed -i '/github/d' #{requirement_file}"
+        only_if { comp_name == "swift" }
+      end
+      execute "pip_install_requirements_#{comp_name}" do
+        cwd install_path
+        command "#{pip_cmd} -r requirement_file"
+      end
+    else
+      puts "WARNING: Python requirement file not found!"
     end
-    execute "pip_install_requirements_#{comp_name}" do
-      cwd install_path
-      command "#{pip_cmd} -r tools/pip-requires"
-    end
+
     execute "setup_#{comp_name}" do
       cwd install_path
       command "#{prefix}python setup.py develop"
@@ -146,7 +137,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       owner "root"
       group "root"
       variables({:virtualenv => "#{params[:virtualenv]}", :bin => File.join(params[:virtualenv],"bin",bin) })
-    end
+    end if params[:virtualenv]
   end
 end
 
