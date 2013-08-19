@@ -97,7 +97,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   end
 
   unless params[:without_setup]
-    requirement_file = ["requirements.txt","tools/pip-requires"].select{ |file| File.exists?("/opt/quantum/#{file}") }.first
+    requirement_file = ["requirements.txt","tools/pip-requires"].select{ |file| File.exists?("/opt/#{comp_name}/#{file}") }.first
     if requirement_file
       # workaround for swift
       execute "remove_https_from_pip_requires_for_#{comp_name}" do
