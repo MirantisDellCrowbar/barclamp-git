@@ -29,11 +29,9 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   cnode = params[:cnode] || node
   ref = params[:reference] || cnode[cbook][:git_refspec]
 
-  package("git")
-  package("python-setuptools")
-  package("python-pip")
-  package("python-dev")
-  package("libxslt1-dev")
+  ["git","python-setuptools","python-pip","python-dev","libxslt1-dev"].each do |pkg|
+    package(pkg).run_action(:install)
+  end
 
   if cnode[cbook][:use_gitbarclamp]
     env_filter = " AND git_config_environment:git-config-#{cnode[cbook][:git_instance]}"
