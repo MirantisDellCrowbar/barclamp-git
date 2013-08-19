@@ -64,8 +64,8 @@ begin
             #system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tools/pip-requires"
             #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
             #horizon seems broken with django 1.5, so lets try to freeze 1.4.5
-            system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' tools/pip-requires"
-            pip_requires += File.read("tools/pip-requires").split("\n").collect{|pip| pip.strip}
+            system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' #{requirement_file}"
+            pip_requires += File.read(requirement_file).split("\n").collect{|pip| pip.strip}
           else
             puts "WARNING: Python requirement file not found!"
           end
