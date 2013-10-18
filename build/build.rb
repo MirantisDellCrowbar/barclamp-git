@@ -3,7 +3,7 @@ require 'yaml'
 require 'fileutils'
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
-pip_cache_storage = "/home/jenkins/crowbar/cache/#{ENV['JOB_NAME']/pip_cached"
+pip_cache_storage = "/home/jenkins/crowbar/cache/#{ENV['JOB_NAME']}/pip_cached"
 
 barclamps = {}
 pip_requires = []
