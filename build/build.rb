@@ -84,7 +84,7 @@ begin
   pip_requires.each do |pip|
     10.times do
       puts ">>> Try download pip: #{pip}"
-      if system("pip install --download #{pip_cache_path} --download-cache #{pip_cache_storage} --exists-action=i --no-install '#{pip}'")
+      if system("pip install --ignore-installed --download #{pip_cache_path} --download-cache #{pip_cache_storage} --exists-action=i --no-install '#{pip}'")
         break
       end
       puts ">>> Retry exec pip2tgz"
