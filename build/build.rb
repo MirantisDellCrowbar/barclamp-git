@@ -3,7 +3,7 @@ require 'yaml'
 require 'fileutils'
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
-pip_cache_storage = "/home/jenkins/crowbar/cache/#{ENV['JOB_NAME']}/pip_cached"
+
 
 barclamps = {}
 pip_requires = []
@@ -80,11 +80,11 @@ begin
   puts ">>> Total unique packages: #{pip_requires.size}"
   puts ">>> Pips to download: #{pip_requires.join(", ")}"
 
-  system("mkdir -p #{pip_cache_path} #{pip_cache_storage}")
+  system("mkdir -p #{pip_cache_path}")
   pip_requires.each do |pip|
     10.times do
       puts ">>> Try download pip: #{pip}"
-      if system("pip install --ignore-installed --download #{pip_cache_path} --download-cache #{pip_cache_storage} --exists-action=i --no-install '#{pip}'")
+      if system("pip install --ignore-installed --download #{pip_cache_path}  --exists-action=i --no-install '#{pip}'")
         break
       end
       puts ">>> Retry exec pip2tgz"
