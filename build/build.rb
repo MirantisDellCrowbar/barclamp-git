@@ -83,7 +83,7 @@ system("mkdir -p #{pip_cache_path}")
 pip_requires.each do |pip|
   10.times do |attempt|
     puts ">>> Try download pip: #{pip} (attempt: #{attempt+1})"
-    unless system("pip2tgz #{pip_cache_path} #{pip_options} '#{pip}'")
+    unless system("pip install --ignore-installed --download #{pip_cache_path}  --exists-action=i --no-install '#{pip}'")
       if attempt >= 9
         exit(1)
       else
