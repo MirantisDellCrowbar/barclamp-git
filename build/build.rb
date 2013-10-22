@@ -3,7 +3,6 @@ require 'yaml'
 require 'fileutils'
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
-pip_req_src = ["requirements.txt","tools/pip-requires"].select{ |file| File.exists?("/opt/#{comp_name}/#{file}") }.first
 
 barclamps = {}
 pip_requires = []
@@ -31,6 +30,7 @@ begin
 
   # Run on each repos and collect pips from tools/pip-requires
   barclamps.each do |barclamp, repos|
+    pip_req_src = ["requirements.txt","tools/pip-requires"].select{ |f| File.exists?("/opt/#{barclamp}/#{f}") }.first
     repos = repos.collect{|i| i.first}
     repos.each do |repo_name,repo|
       puts ">>> Collect pip requires from: #{repo_name} (#{repo[:branches].empty? ? "?" : repo[:branches].join(", ")})"
