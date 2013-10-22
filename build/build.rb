@@ -3,7 +3,7 @@ require 'yaml'
 require 'fileutils'
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
-
+pip_req_src = ["requirements.txt","tools/pip-requires"].select{ |file| File.exists?("/opt/#{comp_name}/#{file}") }.first
 
 barclamps = {}
 pip_requires = []
@@ -57,14 +57,14 @@ begin
         puts ">>> Branch: #{branch}"
         FileUtils.cd("#{repos_path}/#{repo_name}") do
           raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
-          next unless File.exists? "tools/pip-requires"
+          next unless File.exists? pip_req_src
 
           #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
           #system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tools/pip-requires"
           #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
           #horizon seems broken with django 1.5, so lets try to freeze 1.4.5
           system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' tools/pip-requires"
-          pip_requires += File.read("tools/pip-requires").split("\n").collect{|pip| pip.strip}
+          pip_requires += File.read(pip_req_src).split("\n").collect{|pip| pip.strip}
         end
       end
       FileUtils.cd(repos_path) do
