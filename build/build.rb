@@ -83,7 +83,7 @@ begin
   pip_requires.each do |pip|
     10.times do
       puts ">>> Try download pip: #{pip}"
-      if system("pip2tgz #{pip_cache_path} '#{pip}'")
+      if system("pip install --ignore-installed --find-links=file:///tmp/havana/huita/cache/ --no-index --exists-action=i --no-install 'python-novaclient' || pip install --ignore-installed --find-links=file:///tmp/havana/huita/cache/ --download /tmp/havana/huita/cache/  --exists-action=i 'python-novaclient'")
         break
       end
       puts ">>> Retry exec pip2tgz"
